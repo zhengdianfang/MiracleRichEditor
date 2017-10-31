@@ -1,0 +1,3 @@
+rootProject.name = 'miracle_eidtor'
+
+include ':app'
