@@ -4,18 +4,16 @@ import {
   TouchableOpacity,
   Text,
 } from 'react-native';
-import App from './App';
+import RichEditor from './RichEditor';
+import Toolbar from './Toolbar';
 
 class Home extends React.Component<{}>{
+  getEditor = () => this.richEidtor; 
   render() {
     return (
       <View style={{ flex: 1, paddingTop: 32 }}>
-        <TouchableOpacity onPress={() => {
-this.app.getEditorInfos().then(title => console.log(title))}
-        }>
-          <Text>getTitle</Text>
-        </TouchableOpacity>
-        <App ref={ref => this.app = ref} />
+        <Toolbar getEditor={this.getEditor} />
+        <RichEditor ref={ref => this.richEidtor = ref} />
       </View>
     );
   }

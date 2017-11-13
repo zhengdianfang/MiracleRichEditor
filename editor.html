@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="format-detection" content="telephone=no">
+  <script>
+    window.document.addEventListener('message', function (e) {
+        parseActions(JSON.parse(e.data));
+    })
+    sendMessage = function(action) {
+      window.postMessage(JSON.stringify(action));
+    }
+    getSelectedNode = function () {
+      var node, selection;
+      if (window.getSelection) {
+        selection = getSelection();
+        node = selection.anchorNode;
+      }
+      if (!node && document.selection) {
+        selection = document.selection
+        var range = selection.getRangeAt ? selection.getRangeAt(0) : selection.createRange();
+        node = range.commonAncestorContainer ? range.commonAncestorContainer :
+          range.parentElement ? range.parentElement() : range.item(0);
+      }
+      if (node) {
+        return (node.nodeName == "#text" ? node.parentNode : node);
+      }
+    };
+    setBold = function() {
+      document.execCommand('bold', false, null);
+    };
+    setItalic = function() {
+      document.execCommand('italic', false, null);
+    };
+    setUnderline = function() {
+      document.execCommand('underline', false, null);
+    };
+    setSubscript = function() {
+      document.execCommand('subscript', false, null);
+    };
+    setSuperbscript = function() {
+      document.execCommand('superscript', false, null);
+    };
+    setStrikeThrough = function() {
+      document.execCommand('strikeThrough', false, null);
+    };
+
+    setUnderline = function() {
+      document.execCommand('underline', false, null);
+    };
+
+    setBlockquote = function() {
+      document.execCommand('formatBlock', false, '<blockquote>');
+    };
+
+    removeFormating = function() {
+      document.execCommand('removeFormat', false, null);
+    };
+
+    setHorizontalRule = function() {
+      document.execCommand('insertHorizontalRule', false, null);
+    };
+
+    setHeading = function(heading) {
+      document.execCommand('formatBlock', false, '<'+heading+'>');
+    }
+
+    setParagraph = function() {
+      var current_selection = getSelectedNode();
+      var t = current_selection.prop("tagName").toLowerCase();
+      var is_paragraph = (t == 'p');
+      if (is_paragraph) {
+        var c = current_selection.html();
+        current_selection.replaceWith(c);
+      } else {
+        document.execCommand('formatBlock', false, '<p>');
+      }
+    };
+
+    setOrderedList = function() {
+      document.execCommand('insertOrderedList', false, null);
+    };
+
+    setUnorderedList = function() {
+      document.execCommand('insertUnorderedList', false, null);
+    };
+
+    setJustifyCenter = function() {
+      document.execCommand('justifyCenter', false, null);
+    };
+
+    setJustifyFull = function() {
+      document.execCommand('justifyFull', false, null);
+    };
+
+    setJustifyLeft = function() {
+      document.execCommand('justifyLeft', false, null);
+    };
+
+    setJustifyRight = function() {
+      document.execCommand('justifyRight', false, null);
+    };
+
+    setTextColor = function(color) {
+      document.execCommand("styleWithCSS", null, true);
+      document.execCommand('foreColor', false, color);
+      document.execCommand("styleWithCSS", null, false);
+    };
+
+    setBackgroundColor = function(color) {
+      document.execCommand("styleWithCSS", null, true);
+      document.execCommand('hiliteColor', false, color);
+      document.execCommand("styleWithCSS", null, false);
+    };
+    parseActions = function({action, payload}) {
+      const titleElement = document.getElementById('editor_title'); 
+      const abstractElement = document.getElementById('editor_abstract'); 
+      const contentElement = document.getElementById('editor_content'); 
+      const dealerNameElement = document.getElementById('dealer_name'); 
+      const positionElement = document.getElementById('dealer_position'); 
+      if (action === 'init') {
+        titleElement.innerHTML = payload.title;
+        abstractElement.innerHTML = payload.teaser;
+        contentElement.innerHTML = payload.content;
+        dealerNameElement.innerHTML = payload.dealerName;
+        positionElement.innerHTML = payload.dealerPosition;
+      }
+      if (action === 'setTitle') {
+        titleElement.innerHTML = payload;
+      } else if (action === 'setAbstract') {
+        abstractElement.innerHTML = payload;
+      } else if (action === 'setContent') {
+        contentElement.innerHTML = payload;
+      } else if (action === 'setDealerName') {
+        dealerNameElement.innerHTML = payload;
+      } else if (action === 'setDealerPosition') {
+        positionElement.innerHTML = payload;
+      } else if (action === 'insertImage') {
+        const imgWrapperElement = document.createElement('span');
+        imgWrapperElement.setAttribute('class', 'imgWrapper');
+        const imgElement = document.createElement('img');
+        imgElement.src = payload;
+        imgWrapperElement.appendChild(imgElement);
+        contentElement.appendChild(imgWrapperElement);
+      } else if (action === 'getEditorInfos') {
+        const infos = {
+          title: titleElement.innerHTML,
+          teaser: abstractElement.innerHTML,
+          content: contentElement.innerHTML,
+        }
+        sendMessage({action: 'getEditorInfos', payload: infos})
+      } else if (action === 'hideSoftware') {
+        titleElement.blur();
+        contentElement.blur();
+        abstractElement.blur();
+      } else if (action === 'setBold') {
+        setBold();
+      } else if (action === 'setItalic') {
+        setItalic();
+      } else if (action === 'setOrderedList') {
+        setOrderedList();
+      } else if (action === 'setUnorderedList') {
+        setUnorderedList();
+      } else if (action === 'setUnderline') {
+        setUnderline();
+      }
+
+    }
+    var editor = {};
+    editor.setTitle = function(title) {
+      document.firstElementChild('editor_title').text = title;
+    }
+  </script>
+  <body>
+    <div class="section">Identity</div>
+    <div id="dealer_name" disableLineBreaks="true"></div>
+    <div id="dealer_position" disableLineBreaks="true"></div>
+    <div class="section"></div>
+    <div id="editor_title_wrapper">
+      <div id="editor_title" contenteditable="true" placeholder="Title" disableLineBreaks="true"></div>
+    </div>
+    <div id="editor_abstract_wrapper">
+      <div id="editor_abstract"  contenteditable="true" placeholder="Abstract" disableLineBreaks="true"></div>
+    </div>
+    <div class="section">Content</div>
+    <div id="editor_content" class="editor_content" contenteditable="true" placeholder="Content"> </div>
+ </body>
+ <style type="text/css">
+    * {
+      outline: 0px solid transparent;
+      -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+      -webkit-touch-callout: none;
+    }
+
+    html,
+    body {
+      padding: 0;
+      margin: 0;
+      font-size: 1em;
+      color: #2d4150;
+      font-family: 'PingFangSC'
+    }
+
+    body {
+      padding-left: 0px;
+      padding-right: 0px;
+      padding-top: 0px;
+      padding-bottom: 0px;
+      overflow-y: scroll;
+      -webkit-overflow-scrolling: touch;
+      height: 100%;
+    }
+
+    img {
+      max-width: 100%;
+      display: inline-block;
+    }
+
+    .imgWrapper {
+      padding-top: 16pt;
+      padding-bottom: 16pt;
+    }
+
+    .section {
+      background-color: #eeeeee;
+      height: 20pt;
+      line-height: 20pt;
+      font-family: "PingFangSC";
+      color: rgba(153, 153, 153, 0.99);
+      font-size: 12pt;
+      padding-left: 17.5pt;
+    }
+
+    #dealer_name {
+      padding-left: 17.5pt;
+      padding-right: 17.5pt;
+      font-size: 12pt;
+      line-height: 36pt;
+      height: 36pt;
+      border-bottom: #cccccc solid 0.1pt;
+    }
+
+    #dealer_position {
+      padding-left: 17.5pt;
+      padding-right: 17.5pt;
+      font-size: 12pt;
+      line-height: 36pt;
+      height: 36pt;
+    }
+
+    #editor_title_wrapper {
+      display: flex;
+      padding-left: 17.5pt;
+      padding-right: 17.5pt;
+      min-height: 36pt;
+      align-items: center;
+      border-bottom: #cccccc solid 0.1pt;
+    }
+
+    #editor_title {
+      width: 100%;
+      font-size: 12pt;
+    }
+
+    #editor_abstract_wrapper {
+      display: flex;
+      padding-left: 17.5pt;
+      padding-right: 17.5pt;
+      min-height: 36pt;
+      align-items: center;
+    }
+
+    #editor_abstract {
+      font-size: 12pt;
+      width: 100%;
+    }
+
+    #editor_content {
+      color: #000;
+      height: 100%;
+      -webkit-overflow-scrolling: touch;
+      overflow: auto;
+      padding-left: 16pt;
+      padding-right: 16pt;
+      padding-top: 16pt;
+    }
+
+    [placeholder]:empty:before {
+      content: attr(placeholder);
+      color: rgba(204, 204, 204, 0.99);
+      font-size: 12pt;
+    }
+
+    [placeholder]:empty:focus:before {
+      content: attr(placeholder);
+      color: rgba(204, 204, 204, 0.99);
+      font-size: 12pt;
+    }
+  </style>
+</html>
